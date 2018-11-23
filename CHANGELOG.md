@@ -5,6 +5,8 @@
 * Add possibility to label and annotate different resources (#1093)
 * Add support for TransactionalID in KafkaUser resource
 * Update to Kafka 2.0.1
+* Add support for upgrading between Kafka versions (#1103). This removes support for `STRIMZI_DEFAULT_KAFKA_IMAGE` environment variable in the Cluster Operator, replacing it with `STRIMZI_KAFKA_IMAGE_MAP`.  
+
 
 ## 0.8.2
 
