@@ -22,6 +22,7 @@ import io.strimzi.api.kafka.model.ExternalLogging;
 import io.strimzi.api.kafka.model.Kafka;
 import io.strimzi.api.kafka.model.CertificateAuthority;
 import io.strimzi.certs.CertManager;
+import io.strimzi.operator.cluster.ClusterOperator;
 import io.strimzi.operator.cluster.model.AbstractModel;
 import io.strimzi.operator.cluster.model.Ca;
 import io.strimzi.operator.cluster.model.ClientsCa;
@@ -123,6 +124,8 @@ public class KafkaAssemblyOperator extends AbstractAssemblyOperator<KubernetesCl
         new ReconciliationState(reconciliation, kafkaAssembly)
                 .reconcileCas()
 
+                .compose(state -> state.clusterOperatorSecret())
+
                 .compose(state -> state.zkManualPodCleaning())
                 .compose(state -> state.zkManualRollingUpdate())
                 .compose(state -> state.getZookeeperState())
@@ -133,8 +136,8 @@ public class KafkaAssemblyOperator extends AbstractAssemblyOperator<KubernetesCl
                 .compose(state -> state.zkNodesSecret())
                 .compose(state -> state.zkNetPolicy())
                 .compose(state -> state.zkStatefulSet())
-                .compose(state -> state.zkRollingUpdate())
                 .compose(state -> state.zkScaleUp())
+                .compose(state -> state.zkRollingUpdate())
                 .compose(state -> state.zkServiceEndpointReadiness())
                 .compose(state -> state.zkHeadlessServiceEndpointReadiness())
 
@@ -1172,6 +1175,11 @@ public class KafkaAssemblyOperator extends AbstractAssemblyOperator<KubernetesCl
         private int getCaCertGeneration(Ca ca) {
             String generation = Util.annotations(ca.caCertSecret()).get(Ca.ANNO_STRIMZI_IO_CA_CERT_GENERATION);
             return generation != null ? Integer.parseInt(generation) : Ca.INIT_GENERATION;
+        }
+
+        Future<ReconciliationState> clusterOperatorSecret() {
+            return withVoid(secretOperations.reconcile(namespace, ClusterOperator.secretName(name),
+                    ClusterOperator.generateSecret(clusterCa, namespace, name)));
         }
     }
 
