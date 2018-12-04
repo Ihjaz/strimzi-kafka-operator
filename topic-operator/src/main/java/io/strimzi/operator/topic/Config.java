@@ -105,6 +105,11 @@ public class Config {
     public static final String TC_TLS_TRUSTSTORE_PASSWORD = "STRIMZI_TRUSTSTORE_PASSWORD";
     public static final String TC_TLS_KEYSTORE_LOCATION = "STRIMZI_KEYSTORE_LOCATION";
     public static final String TC_TLS_KEYSTORE_PASSWORD = "STRIMZI_KEYSTORE_PASSWORD";
+    public static final String TC_TLS_HOSTNAME_VERIFICATION = "STRIMZI_TLS_HOSTNAME_VERIFICATION";
+    public static final String TC_SASL_ENABLED = "STRIMZI_SASL_ENABLED";
+    public static final String TC_SASL_MECHANISM = "STRIMZI_SASL_MECHANISM";
+    public static final String TC_SASL_CLIENT_CALLBACK_HANDLER_CLASS = "STRIMZI_SASL_CLIENT_CALLBACK_HANDLER_CLASS";
+    public static final String TC_SASL_JAAS_CONFIG = "STRIMZI_SASL_JAAS_CONFIG";
 
     private static final Map<String, Value<?>> CONFIG_VALUES = new HashMap<>();
 
@@ -151,6 +156,17 @@ public class Config {
     public static final Value<String> TLS_KEYSTORE_LOCATION = new Value<>(TC_TLS_KEYSTORE_LOCATION, STRING, "");
     /** The password for keystore with private key and certificate for client authentication against Kafka broker */
     public static final Value<String> TLS_KEYSTORE_PASSWORD = new Value<>(TC_TLS_KEYSTORE_PASSWORD, STRING, "");
+    /** */
+    public static final Value<String> TLS_HOSTNAME_VERIFICATION = new Value<>(TC_TLS_HOSTNAME_VERIFICATION, STRING, "true");    
+    /**  */
+    public static final Value<String> SASL_ENABLED = new Value<>(TC_SASL_ENABLED, STRING, "false");
+    /**  */
+    public static final Value<String> SASL_MECHANISM = new Value<>(TC_SASL_MECHANISM, STRING, "");
+    /**  */
+    public static final Value<String> SASL_CLIENT_CALLBACK_HANDLER_CLASS = new Value<>(TC_SASL_CLIENT_CALLBACK_HANDLER_CLASS, STRING, "");
+    /**  */
+    public static final Value<String> SASL_JAAS_CONFIG = new Value<>(TC_SASL_JAAS_CONFIG, STRING, "");
+    
 
     static {
         Map<String, Value<?>> configValues = CONFIG_VALUES;
@@ -169,6 +185,11 @@ public class Config {
         addConfigValue(configValues, TLS_TRUSTSTORE_PASSWORD);
         addConfigValue(configValues, TLS_KEYSTORE_LOCATION);
         addConfigValue(configValues, TLS_KEYSTORE_PASSWORD);
+        addConfigValue(configValues, TLS_HOSTNAME_VERIFICATION);
+        addConfigValue(configValues, SASL_ENABLED);
+        addConfigValue(configValues, SASL_MECHANISM);
+        addConfigValue(configValues, SASL_CLIENT_CALLBACK_HANDLER_CLASS);
+        addConfigValue(configValues, SASL_JAAS_CONFIG);   
     }
 
     static void addConfigValue(Map<String, Value<?>> configValues, Value<?> cv) {
