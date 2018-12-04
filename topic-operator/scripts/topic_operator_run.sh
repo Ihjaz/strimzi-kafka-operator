@@ -23,4 +23,4 @@ if [ "$STRIMZI_TLS_ENABLED" = "true" ]; then
     fi
 fi
 
-exec /bin/launch_java.sh $1
+exec /bin/launch_java.sh $1 $2 $3

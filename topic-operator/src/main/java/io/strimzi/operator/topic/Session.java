@@ -18,6 +18,7 @@ import io.vertx.core.http.HttpServer;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.common.config.SslConfigs;
+import org.apache.kafka.common.config.SaslConfigs;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -116,15 +117,27 @@ public class Session extends AbstractVerticle {
         Properties adminClientProps = new Properties();
         adminClientProps.setProperty(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, config.get(Config.KAFKA_BOOTSTRAP_SERVERS));
 
-        if (Boolean.valueOf(config.get(Config.TLS_ENABLED))) {
+        if (Boolean.valueOf(config.get(Config.SASL_ENABLED))) {
+            if (Boolean.valueOf(config.get(Config.TLS_ENABLED))) {
+                adminClientProps.setProperty(AdminClientConfig.SECURITY_PROTOCOL_CONFIG, "SASL_SSL");
+                setHostnameVerification(adminClientProps);
+            } else {
+                adminClientProps.setProperty(AdminClientConfig.SECURITY_PROTOCOL_CONFIG, "SASL_PLAINTEXT");   
+            }
+            adminClientProps.setProperty(SaslConfigs.SASL_MECHANISM, config.get(Config.SASL_MECHANISM));
+            adminClientProps.setProperty(SaslConfigs.SASL_CLIENT_CALLBACK_HANDLER_CLASS, config.get(Config.SASL_CLIENT_CALLBACK_HANDLER_CLASS));
+            adminClientProps.setProperty(SaslConfigs.SASL_JAAS_CONFIG, config.get(Config.SASL_JAAS_CONFIG));
+        } else if (Boolean.valueOf(config.get(Config.TLS_ENABLED))) {
             adminClientProps.setProperty(AdminClientConfig.SECURITY_PROTOCOL_CONFIG, "SSL");
             adminClientProps.setProperty(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG, config.get(Config.TLS_TRUSTSTORE_LOCATION));
             adminClientProps.setProperty(SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG, config.get(Config.TLS_TRUSTSTORE_PASSWORD));
-            adminClientProps.setProperty(SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG, config.get(Config.TLS_KEYSTORE_LOCATION));
-            adminClientProps.setProperty(SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG, config.get(Config.TLS_KEYSTORE_PASSWORD));
-            adminClientProps.setProperty(SslConfigs.SSL_ENDPOINT_IDENTIFICATION_ALGORITHM_CONFIG, "HTTPS");
+            setHostnameVerification(adminClientProps);
+            if (!(config.get(Config.TLS_KEYSTORE_LOCATION)).isEmpty()) {
+                adminClientProps.setProperty(SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG, config.get(Config.TLS_KEYSTORE_LOCATION));
+                adminClientProps.setProperty(SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG, config.get(Config.TLS_KEYSTORE_PASSWORD));
+            }
         }
-
+        
         this.adminClient = AdminClient.create(adminClientProps);
         LOGGER.debug("Using AdminClient {}", adminClient);
         this.kafka = new OperatorAssignedKafkaImpl(adminClient, vertx, config);
@@ -181,6 +194,15 @@ public class Session extends AbstractVerticle {
         };
         periodic.handle(null);
         LOGGER.info("Started");
+    }
+
+    private void setHostnameVerification(Properties adminClientProps) {
+
+        if (Boolean.valueOf(config.get(Config.TLS_HOSTNAME_VERIFICATION))) {
+            adminClientProps.setProperty(SslConfigs.SSL_ENDPOINT_IDENTIFICATION_ALGORITHM_CONFIG, "https");
+        } else {
+            adminClientProps.setProperty(SslConfigs.SSL_ENDPOINT_IDENTIFICATION_ALGORITHM_CONFIG, "");
+        }
     }
 
     /**
