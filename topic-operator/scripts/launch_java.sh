@@ -1,8 +1,6 @@
 #!/bin/sh
 set -x
-JAR=$1
-AUTH_JAR=$2
-MAIN_CLASS=$3
+MAIN_CLASS=$2
 shift
 
 . /bin/dynamic_resources.sh
@@ -20,4 +18,10 @@ JAVA_OPTS="${JAVA_OPTS} -Dvertx.cacheDirBase=/tmp -Djava.security.egd=file:/dev/
 # Enable GC logging for memory tracking
 JAVA_OPTS="${JAVA_OPTS} -XX:NativeMemoryTracking=summary -verbose:gc -Xlog:gc*"
 
-exec java $JAVA_OPTS -cp /$JAR:/$AUTH_JAR $JAVA_OPTS $MAIN_CLASS $@
+CLASSPATH=""
+for file in "$1"/*.jar;
+do
+  CLASSPATH="$CLASSPATH":"$file"
+done
+
+exec java $JAVA_OPTS -cp $CLASSPATH $JAVA_OPTS $MAIN_CLASS $@
