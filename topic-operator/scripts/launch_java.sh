@@ -1,5 +1,6 @@
 #!/bin/sh
 set -x
+JAR_LOCATION=$1
 MAIN_CLASS=$2
 shift
 
@@ -19,7 +20,7 @@ JAVA_OPTS="${JAVA_OPTS} -Dvertx.cacheDirBase=/tmp -Djava.security.egd=file:/dev/
 JAVA_OPTS="${JAVA_OPTS} -XX:NativeMemoryTracking=summary -verbose:gc -Xlog:gc*"
 
 CLASSPATH=""
-for file in "$1"/*.jar;
+for file in "$JAR_LOCATION"/*.jar;
 do
   CLASSPATH="$CLASSPATH":"$file"
 done
